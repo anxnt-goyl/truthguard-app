@@ -1,36 +1,47 @@
-import React from "react";
+import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import TruthGuardApp from "./components/truthguardapp"; // Your login page
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      {/* Global notification toasters */}
-      <Toaster />
-      <Sonner />
+const App = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-      <BrowserRouter>
-        <Routes>
-          {/* Main login page */}
-          <Route path="/" element={<TruthGuardApp />} />
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        {/* Global notification toasters */}
+        <Toaster />
+        <Sonner />
 
-          {/* Other pages */}
-          <Route path="/index" element={<Index />} />
+        <BrowserRouter>
+          <Routes>
+            {/* Login page */}
+            <Route
+              path="/login"
+              element={<TruthGuardApp onLogin={() => setIsLoggedIn(true)} />}
+            />
 
-          {/* Catch-all for 404 */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+            {/* Main page, only accessible after login */}
+            <Route
+              path="/"
+              element={isLoggedIn ? <Index /> : <Navigate to="/login" />}
+            />
+
+            {/* Catch-all 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
